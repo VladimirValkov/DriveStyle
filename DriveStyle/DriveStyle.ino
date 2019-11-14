@@ -2,20 +2,29 @@
 #include <SPI.h>
 #include <SD.h>
 #include<Wire.h>
-
-File myFile;
-Sd2Card card;
-SdVolume volume;
-SdFile root;
-RTC_DS1307 rtc;
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
 
 unsigned long m = 0, m1 = 0;
+int counter = 0;
 int buff_id = 0;
 const int MPU_addr=0x69;
 int16_t AcX,AcY,AcZ, AcXold, AcYold, AcZold;
 float dX, dY , dZ,dXa,dYa,dZa;
 char filename[20];
 const int chipSelect = 10;
+static const int RXPin = 4, TXPin = 3;
+static const uint32_t GPSBaud = 9600;
+
+File myFile;
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+RTC_DS1307 rtc;
+TinyGPSPlus gps;
+SoftwareSerial ss(RXPin, TXPin);
+
+
 
 void fLog()
 {
@@ -37,11 +46,17 @@ void fLog()
     myFile.print(':');
     myFile.print(now3.second(), DEC);
     myFile.print(';');
-    myFile.print(dXa, DEC);
+    myFile.print((unsigned int)dXa, DEC);
     myFile.print(';');
-    myFile.print(dYa, DEC);
+    myFile.print((unsigned int)dYa, DEC);
     myFile.print(';');
-    myFile.println(dZa, DEC);
+    myFile.print((unsigned int)dZa, DEC);
+    myFile.print(';');
+    myFile.print(gps.location.lat(),8);
+    myFile.print(';');
+    myFile.print(gps.location.lng(),8);
+    myFile.print(';');
+    myFile.println(gps.speed.kmph());
       
     }
     myFile.close();
@@ -63,7 +78,8 @@ void readAcc()
 
 void setup() {
   Serial.begin(9600);
-  DateTime now = rtc.now();
+  
+  ss.begin(GPSBaud);
 
   //setup Accelerometer
   Wire.begin();
@@ -82,14 +98,17 @@ void setup() {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     //rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
   }
-//rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
  //rtc.adjust(DateTime(2019, 10, 5, 23, 59, 0));
  //end RTC
+ DateTime now = rtc.now();
  sprintf(filename, "%02d%02d%02d%02d.csv",  now.month(), now.day(), now.hour(), now.minute()); //set filename
  
  
 //setup SD
     SD.begin(chipSelect);
+
+    Serial.println(filename);
   
 }
 
@@ -98,10 +117,25 @@ void loop() {
   if(millis() - m  >= 1000)
       {
         m = millis();
-        dXa = round(sqrt(dXa/ 10));
-        dYa = round(sqrt(dYa/10));
-        dZa = round(sqrt(dZa/10));
+        dXa = round(sqrt(dXa/ counter));
+        dYa = round(sqrt(dYa/counter));
+        dZa = round(sqrt(dZa/counter));
+        counter = 0;
+        
         fLog();
+        
+          //if(gps.location.isUpdated()){
+            // Latitude in degrees (double)
+            Serial.print("Latitude= "); 
+            Serial.print(gps.location.lat(), 6);      
+            // Longitude in degrees (double)
+            Serial.print(" Longitude= "); 
+            Serial.print(gps.location.lng(), 6);
+            Serial.print(" Speed in km/h = ");
+            Serial.print(gps.speed.kmph());
+          //}
+        
+        Serial.print(" ");
         Serial.print(dXa);
         Serial.print(" ");
         Serial.print(dYa);
@@ -126,6 +160,9 @@ void loop() {
         dYa += dY * dY;
         dZa += dZ * dZ;
         
- 
+        counter++;
+     }
+     while(ss.available() > 0){
+          gps.encode(ss.read());
      }
 }
