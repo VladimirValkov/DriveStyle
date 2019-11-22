@@ -10,7 +10,7 @@ int counter = 0;
 int buff_id = 0;
 const int MPU_addr=0x69;
 int16_t AcX,AcY,AcZ, AcXold, AcYold, AcZold;
-float dX, dY , dZ,dXa,dYa,dZa;
+float dX, dY , dZ,dXa,dYa,dZa,dXaold,dYaold,dZaold;
 char filename[20],csv[100];
 const int chipSelect = 10;
 static const int RXPin = 4, TXPin = 3;
@@ -34,19 +34,19 @@ void fLog()
   if (myFile) 
   {
     DateTime now3 = rtc.now();
-    sprintf(tstamp,"%04d-%02d-%02d %02d:%02d:%02d,",now3.year(),now3.month(),now3.day(),now3.hour(),now3.minute(),now3.second());
+    sprintf(tstamp,"%04d-%02d-%02d %02d:%02d:%02d;",now3.year(),now3.month(),now3.day(),now3.hour(),now3.minute(),now3.second());
     myFile.print(tstamp);
     myFile.print((unsigned int)dXa, DEC);
-    myFile.print(',');
+    myFile.print(';');
     myFile.print((unsigned int)dYa, DEC);
-    myFile.print(',');
+    myFile.print(';');
     myFile.print((unsigned int)dZa, DEC);
-    myFile.print(',');
+    myFile.print(';');
     myFile.print(latitude,5);
-    myFile.print(',');
+    myFile.print(';');
     myFile.print(longitude,5);
-    myFile.print(',');
-    myFile.println(velocity,1);
+    myFile.print(';');
+    myFile.println(velocity,0);
       
   }
   myFile.close();
@@ -96,34 +96,33 @@ void setup() {
 }
 
 void loop() {
-//loop to print the data in the SD card
+//log the data into the SD card every 1s
   if(millis() - m  >= 1000)
   {
     m = millis();
     dXa = round(sqrt(dXa/ counter));
     dYa = round(sqrt(dYa/counter));
     dZa = round(sqrt(dZa/counter));
-    counter = 0;   
+    counter = 0;
+    latitude = gps.location.lat();
+    longitude = gps.location.lng();
+    velocity = gps.speed.kmph(); 
     fLog();
     
-    Serial.print("Latitude= "); 
-    Serial.print(gps.location.lat(), 6);      
-    Serial.print(" Longitude= "); 
-    Serial.print(gps.location.lng(), 6);
-    Serial.print(" Speed in km/h = ");
-    Serial.print(gps.speed.kmph());
-    Serial.print(" ");
-    Serial.print(dXa);
-    Serial.print(" ");
-    Serial.print(dYa);
-    Serial.print(" ");
-    Serial.println(dZa);   
-
-    dXa = 0;
-    dYa = 0;
-    dZa = 0;
+    Serial.print("Latitude = "); 
+    Serial.print(latitude, 5);      
+    Serial.print(" Longitude = "); 
+    Serial.print(longitude, 5);
+    Serial.print(" Speed = ");
+    Serial.print(velocity, 0);
+    Serial.print(" km/h X = ");
+    Serial.print(dXa, 0);
+    Serial.print(" Y = ");
+    Serial.print(dYa, 0);
+    Serial.print(" Z = ");
+    Serial.println(dZa, 0);   
   } 
-  //loop to get acceleration
+  //get acceleration every 100ms
   if(millis() - m1 >= 100)
   {
     m1 = millis();
@@ -131,13 +130,13 @@ void loop() {
     AcXold = AcX;
     AcYold = AcY;
     AcZold = AcZ;
-    readAcc();
+    readAcceleration();
     dX = AcX - AcXold;
     dY = AcY - AcYold;
     dZ = AcZ - AcZold;
     dXa += dX * dX;
     dYa += dY * dY;
-    dZa += dZ * dZ;    
+    dZa += dZ * dZ;   
     counter++;
   }
   //loop to get GPS cordinates
