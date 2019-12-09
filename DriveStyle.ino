@@ -1,6 +1,7 @@
 #include "RTClib.h"
 #include <SPI.h>
-#include <SD.h>
+//#include <SD.h>
+#include "SdFat.h"
 #include<Wire.h>
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
@@ -18,9 +19,10 @@ static const uint32_t GPSBaud = 9600;
 double latitude=0.0, longitude=0.0, velocity=0.0;
 
 File myFile;
-Sd2Card card;
-SdVolume volume;
-SdFile root;
+//Sd2Card card;
+//SdVolume volume;
+//SdFile root;
+SdFat SD;
 RTC_DS1307 rtc;
 TinyGPSPlus gps;
 SoftwareSerial ss(RXPin, TXPin);
