@@ -6,12 +6,12 @@
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
 
-unsigned long m = 0, m1 = 0;
+unsigned long m = 0;
 int counter = 0;
 int buff_id = 0;
 const int MPU_addr=0x69;
-int16_t AcX,AcY,AcZ, AcXold, AcYold, AcZold;
-float dX, dY , dZ,dXa,dYa,dZa,dXaold,dYaold,dZaold;
+int16_t AcX,AcY,AcZ;
+int16_t minX=32767,maxX=-32768,minY=32767,maxY=-32768,minZ=32767,maxZ=-32768;
 char filename[20],csv[100];
 const int chipSelect = 10;
 static const int RXPin = 4, TXPin = 3;
@@ -19,9 +19,6 @@ static const uint32_t GPSBaud = 9600;
 double latitude=0.0, longitude=0.0, velocity=0.0;
 
 File myFile;
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
 SdFat SD;
 RTC_DS1307 rtc;
 TinyGPSPlus gps;
@@ -38,11 +35,11 @@ void fLog()
     DateTime now3 = rtc.now();
     sprintf(tstamp,"%04d-%02d-%02d %02d:%02d:%02d;",now3.year(),now3.month(),now3.day(),now3.hour(),now3.minute(),now3.second());
     myFile.print(tstamp);
-    myFile.print((unsigned int)dXa, DEC);
+    myFile.print((unsigned int)maxX-minX, DEC);
     myFile.print(';');
-    myFile.print((unsigned int)dYa, DEC);
+    myFile.print((unsigned int)maxY-minY, DEC);
     myFile.print(';');
-    myFile.print((unsigned int)dZa, DEC);
+    myFile.print((unsigned int)maxZ-minZ, DEC);
     myFile.print(';');
     myFile.print(latitude,5);
     myFile.print(';');
@@ -98,49 +95,52 @@ void setup() {
 }
 
 void loop() {
-//log the data into the SD card every 1s
+  DateTime now2 = rtc.now();
+  //log the data into the SD card every 1s
   if(millis() - m  >= 1000)
   {
-    m = millis();
-    dXa = round(sqrt(dXa/ counter));
-    dYa = round(sqrt(dYa/counter));
-    dZa = round(sqrt(dZa/counter));
-    counter = 0;
     latitude = gps.location.lat();
     longitude = gps.location.lng();
     velocity = gps.speed.kmph(); 
     fLog();
-    
-    Serial.print("Latitude = "); 
-    Serial.print(latitude, 5);      
-    Serial.print(" Longitude = "); 
-    Serial.print(longitude, 5);
-    Serial.print(" Speed = ");
-    Serial.print(velocity, 0);
-    Serial.print(" km/h X = ");
-    Serial.print(dXa, 0);
-    Serial.print(" Y = ");
-    Serial.print(dYa, 0);
-    Serial.print(" Z = ");
-    Serial.println(dZa, 0);   
+
+    Serial.print(maxX-minX);
+    Serial.print(",");
+    Serial.print(maxY-minY);
+    Serial.print(",");
+    Serial.println(maxZ-minZ);
+//    Serial.print("Latitude = "); 
+//    Serial.print(latitude, 5);      
+//    Serial.print(" Longitude = "); 
+//    Serial.print(longitude, 5);
+//    Serial.print(" Speed = ");
+//    Serial.print(velocity, 0);
+//    Serial.print(" km/h X = ");
+//    Serial.print(maxX-minX, 0);
+//    Serial.print(" Y = ");
+//    Serial.print(maxY-minY, 0);
+//    Serial.print(" Z = ");
+//    Serial.println(maxZ-minZ, 0);  
+
+    minX=32767;
+    maxX=-32768;
+    minY=32767;
+    maxY=-32768;
+    minZ=32767;
+    maxZ=-32768;
+    counter = 0;
+
+    m = millis();
   } 
-  //get acceleration every 100ms
-  if(millis() - m1 >= 100)
-  {
-    m1 = millis();
-    DateTime now2 = rtc.now();
-    AcXold = AcX;
-    AcYold = AcY;
-    AcZold = AcZ;
-    readAcceleration();
-    dX = AcX - AcXold;
-    dY = AcY - AcYold;
-    dZ = AcZ - AcZold;
-    dXa += dX * dX;
-    dYa += dY * dY;
-    dZa += dZ * dZ;   
-    counter++;
-  }
+  readAcceleration();
+  if (minX>AcX) minX=AcX; 
+  if (maxX<AcX) maxX=AcX;
+  if (minY>AcY) minY=AcY;
+  if (maxY<AcY) maxY=AcY;
+  if (minZ>AcZ) minZ=AcZ;
+  if (maxZ<AcZ) maxZ=AcZ;  
+  counter++;
+  
   //loop to get GPS cordinates
   while(ss.available() > 0)
   {
