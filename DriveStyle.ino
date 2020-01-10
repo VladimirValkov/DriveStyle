@@ -104,23 +104,19 @@ void loop() {
     velocity = gps.speed.kmph(); 
     fLog();
 
-    Serial.print(maxX-minX);
-    Serial.print(",");
-    Serial.print(maxY-minY);
-    Serial.print(",");
-    Serial.println(maxZ-minZ);
-//    Serial.print("Latitude = "); 
-//    Serial.print(latitude, 5);      
-//    Serial.print(" Longitude = "); 
-//    Serial.print(longitude, 5);
-//    Serial.print(" Speed = ");
-//    Serial.print(velocity, 0);
-//    Serial.print(" km/h X = ");
-//    Serial.print(maxX-minX, 0);
-//    Serial.print(" Y = ");
-//    Serial.print(maxY-minY, 0);
-//    Serial.print(" Z = ");
-//    Serial.println(maxZ-minZ, 0);  
+    
+    Serial.print("Latitude = "); 
+    Serial.print(latitude, 5);      
+    Serial.print(" Longitude = "); 
+    Serial.print(longitude, 5);
+    Serial.print(" Speed = ");
+    Serial.print(velocity, 0);
+    Serial.print(" km/h X = ");
+    Serial.print(maxX-minX, 0);
+    Serial.print(" Y = ");
+    Serial.print(maxY-minY, 0);
+    Serial.print(" Z = ");
+    Serial.println(maxZ-minZ, 0);  
 
     minX=32767;
     maxX=-32768;
