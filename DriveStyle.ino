@@ -112,11 +112,11 @@ void loop() {
     Serial.print(" Speed = ");
     Serial.print(velocity, 0);
     Serial.print(" km/h X = ");
-    Serial.print(maxX-minX, 0);
+    Serial.print(maxX-minX);
     Serial.print(" Y = ");
-    Serial.print(maxY-minY, 0);
+    Serial.print(maxY-minY);
     Serial.print(" Z = ");
-    Serial.println(maxZ-minZ, 0);  
+    Serial.println(maxZ-minZ);  
 
     minX=32767;
     maxX=-32768;
