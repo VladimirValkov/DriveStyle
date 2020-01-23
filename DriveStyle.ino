@@ -105,17 +105,17 @@ void loop() {
     fLog();
 
     
-    Serial.print("Latitude = "); 
-    Serial.print(latitude, 5);      
-    Serial.print(" Longitude = "); 
-    Serial.print(longitude, 5);
-    Serial.print(" Speed = ");
-    Serial.print(velocity, 0);
-    Serial.print(" km/h X = ");
+//    Serial.print("Latitude = "); 
+//    Serial.print(latitude, 5);      
+//    Serial.print(" Longitude = "); 
+//    Serial.print(longitude, 5);
+//    Serial.print(" Speed = ");
+//    Serial.print(velocity, 0);
+//    Serial.print(" ");
     Serial.print(maxX-minX);
-    Serial.print(" Y = ");
+    Serial.print(" ");
     Serial.print(maxY-minY);
-    Serial.print(" Z = ");
+    Serial.print(" ");
     Serial.println(maxZ-minZ);  
 
     minX=32767;
