@@ -7,12 +7,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+import simplekml
 
 time = []
 x = []
 y = []
 z = []
 velocity = []
+kml = simplekml.Kml()
+
+flag = False
+previousCords = [0, 0]
 
 with open('test.csv','r') as csvfile:
     plots = csv.reader(csvfile, delimiter=';')
@@ -22,6 +27,16 @@ with open('test.csv','r') as csvfile:
         y.append(float(row[2]))
         z.append(float(row[3]))
         velocity.append(float(row[6]))
+        kml.newpoint(coords=[(row[5], row[4])], description = "speed = " + row[6] +  "km/h")
+        if flag == True:
+            ls = kml.newlinestring(name='A LineString')
+            ls.coords = [(previousCords[0], previousCords[1]), (row[5], row[4])]
+            ls.style.linestyle.width = 15
+            ls.style.linestyle.color = simplekml.Color.blue
+        previousCords[0] = row[5]
+        previousCords[1] = row[4]
+        flag = True
+
         
 fig = plt.figure(figsize=(30,15))
 
@@ -47,7 +62,11 @@ plt.xlabel('Time', size = 25)
 plt.ylabel('Values', size = 25)
 plt.legend(fontsize = 'xx-large')
 plt.title('Speed in km/h', size = 25)
-plt.show()
+
+plt.savefig('DriveStyle.png', dpi=None, facecolor='w', edgecolor='w',
+        orientation='portrait', papertype=None, format='png',
+        transparent=False, bbox_inches=None, pad_inches=0.1)
+kml.save('DriveStyle.kml')
 
 
 # In[ ]:
