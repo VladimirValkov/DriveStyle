@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[174]:
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
@@ -24,8 +18,7 @@ previousCords = [0, 0]
 minZ = my_data.min(axis=0)[3] * 1.0
 maxZ = my_data.max(axis=0)[3] * 1.0
 colors = list(Color('green').range_to(Color('blue'), 10))
-#print(minZ)
-#print(maxZ)
+
 
 def pick_color(m_min, m_max, m_x):
     return int(((m_x - m_min)/(m_max - m_min)) * 9)
@@ -39,12 +32,11 @@ with open(filename, 'r') as csvfile:
         y.append(float(row[2]))
         z.append(float(row[3]))
         velocity.append(float(row[6]))
-        kml.newpoint(coords=[(row[5], row[4])], description="speed = " + row[6] + " km/h")
+        #kml.newpoint(coords=[(row[5], row[4])], description="speed = " + row[6] + " km/h")
         if flag is True:
             ls = kml.newlinestring(name='A LineString')
             ls.coords = [(previousCords[0], previousCords[1]), (row[5], row[4])]
             ls.style.linestyle.width = 15
-            #print(pick_color(minZ, maxZ, int(row[3])))
             ls.style.linestyle.color = colors[pick_color(minZ, maxZ, int(row[3]))].hex_l.replace('#', 'ff')
         previousCords[0] = row[5]
         previousCords[1] = row[4]
