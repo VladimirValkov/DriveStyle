@@ -4,7 +4,7 @@ DriveStyle is a project based on Arduino Uno. Its aim is to track the route, spe
 
 The project can help many car owners by informing them how their cars are driven.	
 
-DriveStyle's python code creates two files: a png graph and a kml file
+DriveStyle's python code creates two files: a png graph and a kml file.
 Here is an example of a png file:
 ![image](https://github.com/VladimirValkov/DriveStyle/blob/master/tests/DriveStyle.png)
 
